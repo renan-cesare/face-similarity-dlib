@@ -121,7 +121,7 @@ Não use este projeto para identificação, vigilância ou qualquer uso inadequa
 
 ---
 
-## English summary (optional)
+## English summary 
 
 A small study project in Python that compares face embeddings using dlib + OpenCV.  
 It prints the embedding L2 distance and a heuristic 0–100 score (not a real probability).
