@@ -1,30 +1,44 @@
-# Face Similarity (dlib) — projeto de estudo em Python
+# Face Similarity Embeddings (dlib + OpenCV)
 
-Este repositório é um **projeto pessoal/estudo** feito para aprender Python e visão computacional: ele compara **similaridade entre rostos** usando **embeddings** gerados pelo modelo de reconhecimento facial do **dlib** (ResNet).
+Projeto de estudo em Python para comparar similaridade entre rostos usando embeddings (dlib + OpenCV), com execução via linha de comando para comparação entre duas imagens ou entre duas pastas de imagens.
 
-> Importante: o resultado exibido como “score 0–100” é **heurístico** (um indicador visual). Não é uma probabilidade real nem uma “prova” definitiva.
-
----
-
-## Por que esse projeto existe?
-
-Eu queria praticar:
-- leitura de imagens e pipeline simples de CV (OpenCV)
-- detecção de rosto + landmarks (dlib)
-- extração de embeddings e cálculo de distância (NumPy)
-- organização de um script de linha de comando com argumentos
+> English (short): Study project in Python to compare face similarity using dlib embeddings (ResNet) and OpenCV, with CLI commands for image-to-image and folder-to-folder comparison.
 
 ---
 
-## O que ele faz
+## Principais recursos
 
-- Compara **duas imagens** (1 rosto por imagem) e imprime:
-  - distância L2 entre embeddings
-  - um “score” 0–100 baseado em threshold (heurístico)
+* Extração de embeddings faciais com dlib (ResNet)
+* Detecção de rosto e alinhamento por landmarks (shape predictor)
+* Comparação por **distância L2** entre embeddings
+* Modo de execução via CLI:
 
-- Compara **duas pastas de imagens** (todas as combinações) e imprime:
-  - distância média
-  - score médio
+  * `image`: compara 2 imagens (1 rosto por imagem)
+  * `folders`: compara duas pastas (todas as combinações) e retorna média
+* Score heurístico 0–100 baseado em threshold configurável (não é probabilidade)
+
+---
+
+## Contexto
+
+Em cenários de visão computacional, embeddings faciais são utilizados para representar rostos como vetores numéricos, permitindo medir “proximidade” entre duas imagens por meio de uma métrica (ex.: distância L2).
+
+Este repositório foi criado como **projeto de estudo**, com foco em:
+
+* aprender o pipeline (detecção → landmarks → alinhamento → embedding)
+* testar comparação entre imagens e conjuntos simples
+* praticar organização mínima de projeto e execução via CLI
+
+---
+
+## Aviso importante (uso autorizado)
+
+Este repositório é apresentado como exemplo técnico/portfólio.
+
+* **Não utilize** este projeto para fins de vigilância, identificação indevida ou qualquer uso que viole privacidade
+* Use apenas **imagens e ambientes autorizados**
+* Evite utilizar dados pessoais reais — biometria é dado sensível (LGPD)
+* Este projeto não foi desenhado para produção (robustez, governança e controles são limitados)
 
 ---
 
@@ -32,96 +46,112 @@ Eu queria praticar:
 
 ```
 .
+├─ examples/
+│  └─ .gitkeep
+├─ models/
+│  └─ .gitkeep
 ├─ main.py
 ├─ requirements.txt
-├─ models/                 # coloque aqui os modelos .dat do dlib (não versionar)
-└─ examples/
-   ├─ person_a/
-   └─ person_b/
+├─ LICENSE
+└─ README.md
 ```
 
 ---
 
-## Como usar
+## Requisitos
 
-### 1) Requisitos
-- Python 3.10+ (recomendado)
-- Dependências do `requirements.txt`
+* Python 3.10+
+* dlib (pode exigir dependências nativas/compilação dependendo do ambiente)
+* OpenCV
+* Modelos do dlib (arquivos `.dat`) **baixados localmente**:
 
-Instalação:
+  * `shape_predictor_68_face_landmarks.dat`
+  * `dlib_face_recognition_resnet_model_v1.dat`
+
+> Observação: este projeto espera esses arquivos na pasta `models/` por padrão.
+
+---
+
+## Instalação
+
 ```bash
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# Linux / macOS
+source .venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
-> Observação: `dlib` pode exigir ferramentas de build em alguns ambientes (especialmente no Windows).
-> Se der erro, uma abordagem comum é usar um ambiente com wheels já disponíveis, ou instalar via conda.
-> Este projeto é um estudo e não tenta “resolver instalação em todo cenário”.
+---
+
+## Configuração (modelos)
+
+Coloque os arquivos `.dat` dentro de `models/`:
+
+* `models/shape_predictor_68_face_landmarks.dat`
+* `models/dlib_face_recognition_resnet_model_v1.dat`
+
+Por padrão, o projeto já aponta para esses caminhos. Se quiser customizar, use os flags:
+
+* `--predictor`
+* `--encoder`
 
 ---
 
-### 2) Baixar os modelos do dlib
+## Execução
 
-Você precisa colocar estes arquivos na pasta `models/`:
-
-- `shape_predictor_68_face_landmarks.dat`
-- `dlib_face_recognition_resnet_model_v1.dat`
-
-Depois disso, o script já encontra automaticamente por padrão.
-
----
-
-### 3) Comparar duas imagens
+### Comparar duas imagens
 
 ```bash
-python main.py image --img1 examples/person_a/a1.jpg --img2 examples/person_b/b1.jpg
+python main.py image --img1 "caminho/para/img1.jpg" --img2 "caminho/para/img2.jpg"
 ```
 
-Saída esperada (exemplo):
-- Distância (L2): 0.52
-- Score (heurístico): 13.33
-
----
-
-### 4) Comparar duas pastas
+### Comparar duas pastas
 
 ```bash
-python main.py folders --person_a examples/person_a --person_b examples/person_b
+python main.py folders --person_a "caminho/para/pasta_a" --person_b "caminho/para/pasta_b"
 ```
 
----
+### Ajustar threshold (score heurístico)
 
-## Como interpretar os resultados (sem “vender milagre”)
-
-- O dlib gera um vetor (embedding) que representa o rosto.
-- A **distância L2** entre embeddings é uma medida de diferença:
-  - **menor distância** → rostos mais parecidos segundo o modelo
-  - **maior distância** → rostos menos parecidos
-
-O “score 0–100” deste projeto é apenas:
-```
-score = max(0, 1 - distancia/threshold) * 100
+```bash
+python main.py image --img1 "img1.jpg" --img2 "img2.jpg" --threshold 0.6
 ```
 
-Ou seja: é um **mapeamento** para facilitar leitura humana, mas não é ciência exata.
+O processo:
+
+* carrega os modelos do dlib
+* gera embeddings das imagens
+* calcula a distância L2 entre vetores
+* imprime distância e score (0–100, heurístico)
 
 ---
 
-## Limitações conhecidas
+## Saídas geradas
 
-- Sensível a iluminação, ângulo, expressão, qualidade da imagem.
-- Este script exige **apenas 1 rosto por imagem** (por simplicidade).
-- O “score” não é probabilidade; é só um indicador.
+* Saída no console com:
 
----
+  * distância L2
+  * score heurístico (0–100)
 
-## Segurança e privacidade
-
-Este repositório é educacional. Evite usar imagens de terceiros sem permissão.  
-Não use este projeto para identificação, vigilância ou qualquer uso inadequado.
+Este projeto não gera arquivos automaticamente.
 
 ---
 
-## English summary 
+## Sanitização de dados
 
-A small study project in Python that compares face embeddings using dlib + OpenCV.  
-It prints the embedding L2 distance and a heuristic 0–100 score (not a real probability).
+Este repositório não contém dados reais.
+
+* imagens de teste devem permanecer fora do Git (recomendado)
+* arquivos de modelo `.dat` devem permanecer fora do versionamento
+* evite commitar qualquer amostra com dados pessoais reais
+
+---
+
+## Licença
+
+MIT
