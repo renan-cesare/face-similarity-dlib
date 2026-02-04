@@ -150,6 +150,8 @@ Este repositório não contém dados reais.
 * arquivos de modelo `.dat` devem permanecer fora do versionamento
 * evite commitar qualquer amostra com dados pessoais reais
 
+Este projeto não inclui imagens faciais, embeddings ou modelos treinados. O usuário deve fornecer seus próprios dados para testes.
+
 ---
 
 ## Licença
